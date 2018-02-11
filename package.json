@@ -1,0 +1,25 @@
+{
+  "name": "ethereum-wallet-generator",
+  "version": "0.1.0",
+  "description": "Generates random Ethereum private/public keys, QR codes for them, and its address with an identicon",
+  "main": "main.js",
+  "author": "Tundra Fizz",
+  "license": "ISC",
+  "dependencies": {
+    "elliptic": "^6.4.0",
+    "ethereumjs-util": "^5.1.4",
+    "js-sha3": "^0.7.0",
+    "parse-color": "^1.0.0",
+    "pngjs": "^3.3.1",
+    "qr-image": "^3.2.0",
+    "scryptsy": "^2.0.0",
+    "uuid": "^3.2.1"
+  },
+  "scripts": {
+    "start": "node src/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TundraFizz/Ethereum-Wallet-Generator.git"
+  }
+}
