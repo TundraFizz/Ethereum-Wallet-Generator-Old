@@ -5,6 +5,7 @@ const sha3      = require("js-sha3");
 const ethUtil   = require("ethereumjs-util");
 const uuidv4    = require("uuid/v4");
 const scrypt    = require("scryptsy");
+const readline  = require("readline");
 const crypto    = require("crypto");
 const fs        = require("fs");
 
@@ -15,10 +16,26 @@ function EthWallet(){
   this.publicKeyString  = "";
   this.sha3Hash         = "";
   this.ethAddress       = "";
+  this.userPassword     = "";
   this.generator        = elliptic.ec("secp256k1").g;
 
   if(!fs.existsSync("./wallets"))fs.mkdirSync("./wallets");
 }
+
+EthWallet.prototype.PromptUserForPassword = function(){return new Promise((resolve) => {
+  var self = this;
+
+  const rl = readline.createInterface({
+    "input" : process.stdin,
+    "output": process.stdout
+  });
+
+  rl.question("Enter a password to encrypt your private key: ", (answer) => {
+    self.userPassword = answer;
+    rl.close();
+    resolve();
+  });
+})}
 
 EthWallet.prototype.GetPrivateKey = function(){return new Promise((resolve) => {
   var self = this;
@@ -60,11 +77,11 @@ EthWallet.prototype.GetIdenticon = function(){return new Promise((resolve) => {
   resolve();
 })}
 
-EthWallet.prototype.GetKeystoreFile = function(password){return new Promise((resolve) => {
+EthWallet.prototype.GetKeystoreFile = function(){return new Promise((resolve) => {
   var self = this;
   var salt = crypto.randomBytes(32);
   var iv   = crypto.randomBytes(16);
-  var scryptKey = scrypt(password, salt, 8192, 8, 1, 32);
+  var scryptKey = scrypt(self.userPassword, salt, 8192, 8, 1, 32);
 
   var cipher     = crypto.createCipheriv("aes-128-ctr", scryptKey.slice(0, 16), iv);
   var first      = cipher.update(self.privateKeyBuffer);
@@ -117,10 +134,11 @@ EthWallet.prototype.Display = function(){
 
 var ethWallet = new EthWallet();
 
-ethWallet.GetPrivateKey()
+ethWallet.PromptUserForPassword()
+.then(() => ethWallet.GetPrivateKey())
 .then(() => ethWallet.GetPublicKey())
 .then(() => ethWallet.GetEthAddress())
 .then(() => ethWallet.GetQrCodes())
 .then(() => ethWallet.GetIdenticon())
-.then(() => ethWallet.GetKeystoreFile("a"))
+.then(() => ethWallet.GetKeystoreFile())
 .then(() => ethWallet.Display());
